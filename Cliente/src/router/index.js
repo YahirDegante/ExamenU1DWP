@@ -10,7 +10,12 @@ const router = new VueRouter({
     {
       path: '/',
       name: 'home',
-      component: () => import('../components/Home.vue')
+      component: () => import('../App.vue')
+    },
+    {
+      path:'/captcha',
+      name: 'captcha',
+      component: () => import('../components/VlidationCaptcha.vue')
     },
     {
       path: '/summary',
