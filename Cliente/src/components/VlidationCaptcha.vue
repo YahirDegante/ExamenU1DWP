@@ -5,12 +5,7 @@
       <label for="name">Nombre: </label>
       <input type="text" id="name" v-model="formData.name" required />
       <br />
-      <div
-        ref="container"
-        class="frc-captcha"
-        data-sitekey="FCMU8145NO81PCM7"
-        data-lang="es"
-      ></div>
+      <div ref="container" class="frc-captcha" data-sitekey="FCMU8145NO81PCM7" data-lang="es"></div>
       <button type="submit">Enviar</button>
     </form>
   </div>
@@ -19,6 +14,7 @@
 <script>
 import { WidgetInstance } from "friendly-challenge";
 import { ref } from "vue";
+import ServiceCaptcha from "../services/ServiceCaptcha"
 
 export default {
   data() {
@@ -29,6 +25,10 @@ export default {
       },
       widget: null,
     };
+  },
+  async verifyCaptcha(solution) {
+    let response = await ServiceCaptcha.verificarCaptcha(solution);
+    console.log(response);
   },
   methods: {
     submitForm() {
