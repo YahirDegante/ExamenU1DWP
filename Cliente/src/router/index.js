@@ -1,45 +1,79 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 
-Vue.use(VueRouter)
+Vue.use(VueRouter);
 
-const router = new VueRouter({
-  mode: 'history',
-  base: import.meta.env.BASE_URL,
-  routes: [
+import Login from "../components/Login/Login.vue"
+import Editor from "../components/Login/Editor.vue"
+import Viewer from "../components/Login/Viewer.vue"
+import Admin from "../components/Login/Admin.vue"
+import Unauthorized from "../components/Login/Unauthorized.vue"
+import NotFound from "../components/Login/NotFound.vue"
+import { jwtDecode } from 'jwt-decode';
+
+const routes = [
     {
       path: '/',
-      name: 'home',
-      component: () => import('../App.vue')
+      name: '/login',
     },
     {
-      path:'/captcha',
-      name: 'captcha',
-      component: () => import('../components/VlidationCaptcha.vue')
+      name: 'login',
+      path: "/login",
+      component: Login
     },
     {
-      path: '/summary',
-      component: () => import('../components/Summary.vue'),
-      children: [
-        {
-          path: '/summary',
-          name: 'summary',
-          component: () => import('../components/Resumen.vue')
-        },
-        {
-          path: '/form',
-          name: 'form',
-          component: () => import('../components/Formulario.vue')
-        },
-        {
-          path: '/content',
-          name: 'content',
-          component: () => import('../components/Paginacion.vue')
-        }
-      ]
-    }
+      name: "admin",
+      path: "/admin",
+      component: Admin,
+      meta: {role: 'admin'}
+    },
+    {
+      name: "viewer",
+      path: "/viewer",
+      component: Viewer,
+      meta: {role: 'viewer'}
+    },
+    {
+      name: "editor",
+      path: "/editor",
+      component: Editor,
+      meta: {role: 'editor'}
+    },
+    {
+      name: "unauthorized",
+      path: "/unauthorized",
+      component: Unauthorized,
+    },
+    {
+      name: "NotFound",
+      path: "/:catchAll(.*)",
+      component: NotFound,
+    },
   ]
+
+const router = new VueRouter({
+  routes
 })
 
-//const router = new VueRouter({routes,})
-export default router
+router.beforeEach ((to, from, next) => {
+  const publicPages = ['/login','/', '/unauthorized'];
+  //Se añade rutas que consideren publicas
+  const authRequired = !publicPages.includes(to.path);
+  const loggedIn = localStorage.getItem('token');
+
+  if(authRequired && !loggedIn){
+    return next('/login');
+  }
+
+  if(loggedIn){
+    const decoded = jwtDecode(loggedIn);
+    const role = decoded.role;
+    if(to.meta.role && to.meta.role !== role){
+      return next('/unauthorized');
+    }
+  }
+
+  next();
+});
+
+export default router;
